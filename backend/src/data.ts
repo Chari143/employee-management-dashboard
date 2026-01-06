@@ -4,16 +4,16 @@ import { Employee } from './types';
 export let employees: Employee[] = [
     {
         id: 'EMP001',
-        fullName: 'Rahul Sharma',
+        fullName: 'Hari Chari',
         gender: 'male',
         dateOfBirth: '1990-05-15',
         profileImage: 'https://randomuser.me/api/portraits/men/1.jpg',
-        state: 'Maharashtra',
+        state: 'Andhra Pradesh',
         isActive: true,
     },
     {
         id: 'EMP002',
-        fullName: 'Priya Patel',
+        fullName: 'Priya',
         gender: 'female',
         dateOfBirth: '1992-08-22',
         profileImage: 'https://randomuser.me/api/portraits/women/2.jpg',
@@ -22,7 +22,7 @@ export let employees: Employee[] = [
     },
     {
         id: 'EMP003',
-        fullName: 'Amit Kumar',
+        fullName: 'Kumar',
         gender: 'male',
         dateOfBirth: '1988-12-10',
         profileImage: 'https://randomuser.me/api/portraits/men/3.jpg',
@@ -31,7 +31,7 @@ export let employees: Employee[] = [
     },
     {
         id: 'EMP004',
-        fullName: 'Sneha Reddy',
+        fullName: 'Sneha',
         gender: 'female',
         dateOfBirth: '1995-03-28',
         profileImage: 'https://randomuser.me/api/portraits/women/4.jpg',
@@ -40,7 +40,7 @@ export let employees: Employee[] = [
     },
     {
         id: 'EMP005',
-        fullName: 'Vikram Singh',
+        fullName: 'Vikram',
         gender: 'male',
         dateOfBirth: '1985-07-04',
         profileImage: 'https://randomuser.me/api/portraits/men/5.jpg',

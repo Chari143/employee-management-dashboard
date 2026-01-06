@@ -1,54 +1,155 @@
 import express from 'express';
 import cors from 'cors';
-import { employees, generateId } from './data';
-import { Employee } from './types';
+import prisma from './prisma';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// get all
-app.get('/api/employees', (req, res) => {
-    res.json(employees);
+// get all employees
+app.get('/api/employees', async (req, res) => {
+    try {
+        const employees = await prisma.employee.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(employees);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch employees' });
+    }
 });
 
-// get one
-app.get('/api/employees/:id', (req, res) => {
-    const emp = employees.find(e => e.id === req.params.id);
-    if (!emp) return res.status(404).json({ error: 'Not found' });
-    res.json(emp);
+// get one employee
+app.get('/api/employees/:id', async (req, res) => {
+    try {
+        const emp = await prisma.employee.findUnique({
+            where: { id: req.params.id }
+        });
+        if (!emp) return res.status(404).json({ error: 'Not found' });
+        res.json(emp);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch employee' });
+    }
 });
 
-// create
-app.post('/api/employees', (req, res) => {
-    const newEmp: Employee = { ...req.body, id: generateId() };
-    employees.push(newEmp);
-    res.status(201).json(newEmp);
+// create employee
+app.post('/api/employees', async (req, res) => {
+    try {
+        const newEmp = await prisma.employee.create({
+            data: req.body
+        });
+        res.status(201).json(newEmp);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to create employee' });
+    }
 });
 
-// update
-app.put('/api/employees/:id', (req, res) => {
-    const idx = employees.findIndex(e => e.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    employees[idx] = { ...employees[idx], ...req.body };
-    res.json(employees[idx]);
+// update employee
+app.put('/api/employees/:id', async (req, res) => {
+    try {
+        const updated = await prisma.employee.update({
+            where: { id: req.params.id },
+            data: req.body
+        });
+        res.json(updated);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update employee' });
+    }
 });
 
-// delete
-app.delete('/api/employees/:id', (req, res) => {
-    const idx = employees.findIndex(e => e.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    employees.splice(idx, 1);
-    res.status(204).send();
+// delete employee
+app.delete('/api/employees/:id', async (req, res) => {
+    try {
+        await prisma.employee.delete({
+            where: { id: req.params.id }
+        });
+        res.status(204).send();
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete employee' });
+    }
 });
 
 // toggle status
-app.patch('/api/employees/:id/toggle', (req, res) => {
-    const emp = employees.find(e => e.id === req.params.id);
-    if (!emp) return res.status(404).json({ error: 'Not found' });
-    emp.isActive = !emp.isActive;
-    res.json(emp);
+app.patch('/api/employees/:id/toggle', async (req, res) => {
+    try {
+        const emp = await prisma.employee.findUnique({
+            where: { id: req.params.id }
+        });
+        if (!emp) return res.status(404).json({ error: 'Not found' });
+
+        const updated = await prisma.employee.update({
+            where: { id: req.params.id },
+            data: { isActive: !emp.isActive }
+        });
+        res.json(updated);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to toggle status' });
+    }
+});
+
+// seed initial data
+app.post('/api/seed', async (req, res) => {
+    try {
+        const count = await prisma.employee.count();
+        if (count > 0) {
+            return res.json({ message: 'Database already has data' });
+        }
+
+        await prisma.employee.createMany({
+            data: [
+                {
+                    fullName: 'Hari Chari',
+                    gender: 'male',
+                    dateOfBirth: '1990-05-15',
+                    profileImage: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Hari',
+                    state: 'Andhra Pradesh',
+                    isActive: true,
+                },
+                {
+                    fullName: 'Priya',
+                    gender: 'female',
+                    dateOfBirth: '1992-08-22',
+                    profileImage: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya',
+                    state: 'Gujarat',
+                    isActive: true,
+                },
+                {
+                    fullName: 'Kumar',
+                    gender: 'male',
+                    dateOfBirth: '1988-12-10',
+                    profileImage: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Kumar',
+                    state: 'Karnataka',
+                    isActive: false,
+                },
+                {
+                    fullName: 'Sneha',
+                    gender: 'female',
+                    dateOfBirth: '1995-03-28',
+                    profileImage: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sneha',
+                    state: 'Telangana',
+                    isActive: true,
+                },
+                {
+                    fullName: 'Vikram',
+                    gender: 'male',
+                    dateOfBirth: '1985-07-04',
+                    profileImage: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Vikram',
+                    state: 'Delhi',
+                    isActive: false,
+                },
+            ]
+        });
+        res.json({ message: 'Database seeded with sample data' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to seed database' });
+    }
 });
 
 app.listen(5000, () => console.log('Backend running on port 5000'));
