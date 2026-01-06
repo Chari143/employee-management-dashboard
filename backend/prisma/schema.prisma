@@ -9,6 +9,7 @@ datasource db {
 
 model Employee {
   id           String   @id @default(cuid())
+  employeeId   String   @unique
   fullName     String
   gender       String
   dateOfBirth  String

@@ -37,8 +37,20 @@ app.get('/api/employees/:id', async (req, res) => {
 // create employee
 app.post('/api/employees', async (req, res) => {
     try {
+        // Generate new Employee ID
+        const lastEmp = await prisma.employee.findFirst({
+            orderBy: { employeeId: 'desc' }
+        });
+
+        let nextId = 'EMP001';
+        if (lastEmp && lastEmp.employeeId) {
+            const currentId = lastEmp.employeeId;
+            const numericPart = parseInt(currentId.replace('EMP', ''));
+            nextId = `EMP${String(numericPart + 1).padStart(3, '0')}`;
+        }
+
         const newEmp = await prisma.employee.create({
-            data: req.body
+            data: { ...req.body, employeeId: nextId }
         });
         res.status(201).json(newEmp);
     } catch (err) {
@@ -104,6 +116,7 @@ app.post('/api/seed', async (req, res) => {
         await prisma.employee.createMany({
             data: [
                 {
+                    employeeId: 'EMP001',
                     fullName: 'Hari Chari',
                     gender: 'male',
                     dateOfBirth: '1990-05-15',
@@ -112,6 +125,7 @@ app.post('/api/seed', async (req, res) => {
                     isActive: true,
                 },
                 {
+                    employeeId: 'EMP002',
                     fullName: 'Priya',
                     gender: 'female',
                     dateOfBirth: '1992-08-22',
@@ -120,6 +134,7 @@ app.post('/api/seed', async (req, res) => {
                     isActive: true,
                 },
                 {
+                    employeeId: 'EMP003',
                     fullName: 'Kumar',
                     gender: 'male',
                     dateOfBirth: '1988-12-10',
@@ -128,6 +143,7 @@ app.post('/api/seed', async (req, res) => {
                     isActive: false,
                 },
                 {
+                    employeeId: 'EMP004',
                     fullName: 'Sneha',
                     gender: 'female',
                     dateOfBirth: '1995-03-28',
@@ -136,6 +152,7 @@ app.post('/api/seed', async (req, res) => {
                     isActive: true,
                 },
                 {
+                    employeeId: 'EMP005',
                     fullName: 'Vikram',
                     gender: 'male',
                     dateOfBirth: '1985-07-04',
